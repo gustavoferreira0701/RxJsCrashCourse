@@ -1,4 +1,5 @@
-import { Observable, observable } from "rxjs";
+import { Observable, from } from "rxjs";
+import { share } from 'rxjs/operators';
 
 
 var observableItem = Observable.create(
@@ -19,30 +20,32 @@ var observableItem = Observable.create(
         } catch (error) {
             observer.error(error)
         }
-    });
+    }).pipe(
+        share()
+    )
+    ;
 
 //Due to changes, on the version 6 of rxjs the subscribe function returns a disposable object, so with this object you can 'unsubscribe'
-/**
+
+/*
  * The producer function is activated when a observer subscribes to an observable item (like showed below)
  * While no one subscribes, nothing happens
- *  */
+ *  
+ */
+
+//This is also an example of a cold observable
 var observer = observableItem.subscribe(
-    (x: any) => addItem('first => ' + x),
+    (x: any) => addItem(x),
     (error: any) => addItem(error),
     () => addItem('Completed')
 );
 
-var second_observer = observableItem.subscribe(
-    (x: any) => addItem('second => ' + x)
-)
-
-//tying the second subscriber to the first one (child subscriber, when the first stops the child will also stops)
-observer.add(second_observer)
 
 setTimeout(() => {
-    addItem("Unsubscribing!");
-    observer.unsubscribe();
-}, 6001);
+    var second = observableItem.subscribe(
+        (x: any) => addItem('Subscriber 2 ' + x)
+    );
+}, 1000);
 
 function addItem(val: any) {
     var node = document.createElement("li");
