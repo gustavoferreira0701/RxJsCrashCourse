@@ -18,15 +18,15 @@ var observableItem = Observable.create((observer: any) => {
 });
 
 //Due to changes, on the version 6 of rxjs the subscribe function returns a disposable object, so with this object you can 'unsubscribe'
-var subscription = observableItem.subscribe(
-    (x: any) => addItem(x),
-    (error: any) => addItem(error),
-    () => addItem('Completed')
+var observer = observableItem.subscribe(
+    (x: any) => addItem(x), //next function
+    (error: any) => addItem(error), //error function 
+    () => addItem('Completed') //complete function
 );
 
 setTimeout(() => {
     addItem("Unsubscribing!");
-    subscription.unsubscribe();
+    observer.unsubscribe();
 }, 6001);
 
 function addItem(val: any) {
