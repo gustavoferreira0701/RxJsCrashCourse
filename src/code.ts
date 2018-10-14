@@ -3,12 +3,22 @@ import {
     from,
     fromEvent,
     Subject,
-    BehaviorSubject
+    BehaviorSubject,
+    ReplaySubject
 } from "rxjs";
 
 import { share } from 'rxjs/operators';
 
-var subject = new BehaviorSubject('First');
+const numberOfDispacthedValues = 30;
+
+const windowTime = 200;
+
+/**
+ * The second argument passed to this constructor means about how much time passed in the past 
+ * the values will capturated. Therefore, if the window time is 200ms and amount of dispatched
+ * values is 30 means that will be send the last 30 values emmited on the last 200ms before now
+ */
+var subject = new ReplaySubject(numberOfDispacthedValues, windowTime);
 
 subject.subscribe(
     data => addItem('Observer 1: ' + data),
@@ -16,19 +26,16 @@ subject.subscribe(
     () => addItem('Observer 1 completed!')
 )
 
-subject.next('The first thing has been sent!');
-subject.next('Observer two is about to subscribe!');
+let i = 1;
+let interval = setInterval(()=>{
+    subject.next(i++)
+}, 100)
 
-var observer2 = subject.subscribe(
-    data => addItem('Observer 2: ' + data)
-)
-
-subject.next('The second thing has been sent!');
-subject.next('A third thing has been sent!');
-
-observer2.unsubscribe()
-
-subject.next('A final thing has been sent!');
+setTimeout(() => {
+    var observer2 = subject.subscribe(
+        data => addItem('Observer 2: ' + data)
+    )    
+}, 500);
 
 function addItem(val: any) {
     var node = document.createElement("li");
